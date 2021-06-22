@@ -24,6 +24,7 @@
 		1A62C674267E97C600A47AEC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A62C677267E97C600A47AEC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1A62C679267E97C600A47AEC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		42FFBE39268288BC00CB9CB0 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +41,7 @@
 		1A62C65F267E97C500A47AEC = {
 			isa = PBXGroup;
 			children = (
+				42FFBE39268288BC00CB9CB0 /* README.md */,
 				1A62C66A267E97C500A47AEC /* Face-Recognition-Demo */,
 				1A62C669267E97C500A47AEC /* Products */,
 			);
