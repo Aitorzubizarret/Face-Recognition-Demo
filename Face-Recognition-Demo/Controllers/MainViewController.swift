@@ -10,21 +10,26 @@ import UIKit
 
 class MainViewController: UIViewController {
 
+    // MARK: - UI Elements
+    @IBOutlet weak var faceDetectionButton: UIButton!
+    @IBAction func faceDetectionButtonTapped(_ sender: Any) {
+        self.goToFaceDetectionVC()
+    }
+    
+    // MARK: - Properties
+    
+    // MARK: - Methods
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
     }
-
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    ///
+    /// Go to Face Detection ViewController.
+    ///
+    private func goToFaceDetectionVC() {
+        self.navigationController?.pushViewController(FaceDetectionViewController(), animated: true)
     }
-    */
-
 }
