@@ -7,24 +7,45 @@
 //
 
 import UIKit
+import AVFoundation
 
 class FaceDetectionViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
+        self.checkCameraPermission()
     }
-
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    ///
+    /// Check if the user granted permission to use the camera.
+    ///
+    private func checkCameraPermission() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            print("Camera permission: Authorized")
+        case .notDetermined:
+            print("Camera permission: Not Determined")
+            self.askCameraPermission()
+        case .denied:
+            print("Camera permission: Denied")
+        case .restricted:
+            print("Camera permission: Restricted")
+        default:
+            print("Camera permission: ¿?")
+        }
     }
-    */
-
+    
+    ///
+    /// Ask permission to the user to access the camera.
+    ///
+    private func askCameraPermission() {
+        AVCaptureDevice.requestAccess(for: .video) { (granted) in
+            if granted {
+                print("Permission granted.")
+            } else {
+                print("The user has NOT granted access to the camera.")
+            }
+        }
+    }
 }
