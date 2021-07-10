@@ -10,7 +10,16 @@ import UIKit
 import AVFoundation
 
 class FaceDetectionViewController: UIViewController {
-
+    
+    // MARK: - UI Elements
+    
+    // MARK: - Properties
+    
+    var captureSession: AVCaptureSession?
+    var captureDevice: AVCaptureDevice?
+    
+    // MARK: - Methods
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -24,6 +33,7 @@ class FaceDetectionViewController: UIViewController {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             print("Camera permission: Authorized")
+            self.setupCameraSession()
         case .notDetermined:
             print("Camera permission: Not Determined")
             self.askCameraPermission()
@@ -32,7 +42,7 @@ class FaceDetectionViewController: UIViewController {
         case .restricted:
             print("Camera permission: Restricted")
         default:
-            print("Camera permission: ¿?")
+            print("Camera permission: ¿Default?")
         }
     }
     
@@ -47,5 +57,52 @@ class FaceDetectionViewController: UIViewController {
                 print("The user has NOT granted access to the camera.")
             }
         }
+    }
+    
+    ///
+    /// Setup the AVCameraSession.
+    ///
+    private func setupCameraSession() {
+        // Create the Capture Session.
+        self.captureSession = AVCaptureSession()
+        
+        // Find a list of cameras from the Device.
+        let discoverSession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera, .builtInTrueDepthCamera],
+                                                               mediaType: .video,
+                                                               position: .front)
+        let devices = discoverSession.devices
+        
+        // Check if there are any cameras and if so select the first one.
+        if !devices.isEmpty {
+            self.captureDevice = devices.first
+            self.displayCameraOutput()
+        } else {
+            print("No cameras")
+        }
+    }
+    
+    ///
+    /// Display the image from the selected camera.
+    ///
+    private func displayCameraOutput() {
+        guard let videoCaptureDevice = self.captureDevice,
+              let _ = self.captureSession,
+              let videoDeviceInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
+              self.captureSession!.canAddInput(videoDeviceInput) else { return }
+        
+        // Add the device input  to the session.
+        self.captureSession!.addInput(videoDeviceInput)
+        
+        // Start the session.
+        self.captureSession!.startRunning()
+        
+        // Create the preview layer.
+        let previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession!)
+        self.view.layer.addSublayer(previewLayer)
+        previewLayer.frame = UIScreen.main.bounds // FIXME: - Get the correct size for the preview layer.
+        
+        // Create the data output and add it to the session.
+        let dataOutput = AVCaptureVideoDataOutput()
+        self.captureSession!.addOutput(dataOutput)
     }
 }

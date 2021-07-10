@@ -11,6 +11,7 @@ import UIKit
 class MainViewController: UIViewController {
 
     // MARK: - UI Elements
+    
     @IBOutlet weak var faceDetectionButton: UIButton!
     @IBAction func faceDetectionButtonTapped(_ sender: Any) {
         self.goToFaceDetectionVC()
