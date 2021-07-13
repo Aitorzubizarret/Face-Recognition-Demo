@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import Vision
 
 class FaceDetectionViewController: UIViewController {
     
@@ -103,6 +104,43 @@ class FaceDetectionViewController: UIViewController {
         
         // Create the data output and add it to the session.
         let dataOutput = AVCaptureVideoDataOutput()
+        dataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue")) // To run the method to detect Faces.
         self.captureSession!.addOutput(dataOutput)
+    }
+    
+}
+
+// MARK: - AVCapture Video Data Output Sample Buffer Delegate
+
+extension FaceDetectionViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    ///
+    /// Detect Faces.
+    ///
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        guard let pixelBuffer: CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        
+        // Method to detect Faces.
+        let request = VNDetectFaceRectanglesRequest { (req, err) in
+            if let err = err {
+                print("Failed to detect faces:", err)
+                return
+            }
+            
+            DispatchQueue.main.async {
+                if let results = req.results {
+                    print("Detected Faces: \(results.count)")
+                }
+            }
+        }
+                
+        DispatchQueue.global(qos: .userInteractive).async {
+            let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+            do {
+                try handler.perform([request])
+            } catch let reqErr {
+                print("Failed to perform request:", reqErr)
+            }
+        }
     }
 }
