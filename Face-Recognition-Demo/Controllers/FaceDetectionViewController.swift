@@ -120,6 +120,26 @@ class FaceDetectionViewController: UIViewController {
         self.captureSession.addOutput(dataOutput)
     }
     
+    ///
+    /// Detect faces on an image.
+    ///
+    private func detectFaces(on image: CIImage) {
+        let faceDetectionRequest = VNDetectFaceRectanglesRequest()
+        let requestHandler = VNSequenceRequestHandler()
+        
+        do {
+            try requestHandler.perform([faceDetectionRequest], on: image)
+            
+            if let results = faceDetectionRequest.results {
+                print("Faces detected: \(results.count)")
+            } else {
+                print("No faces detected")
+            }
+        } catch let error {
+            print("Failed to handler FaceDetectionRequest: \(error.localizedDescription)")
+        }
+    }
+    
 }
 
 // MARK: - AVCapture Video Data Output Sample Buffer Delegate
@@ -132,27 +152,12 @@ extension FaceDetectionViewController: AVCaptureVideoDataOutputSampleBufferDeleg
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let pixelBuffer: CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         
-        // Method to detect Faces.
-        let request = VNDetectFaceRectanglesRequest { (req, err) in
-            if let err = err {
-                print("Failed to detect faces:", err)
-                return
-            }
-            
-            DispatchQueue.main.async {
-                if let results = req.results {
-                    print("Detected Faces: \(results.count)")
-                }
-            }
-        }
-                
-        DispatchQueue.global(qos: .userInteractive).async {
-            let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
-            do {
-                try handler.perform([request])
-            } catch let reqErr {
-                print("Failed to perform request:", reqErr)
-            }
-        }
+        // Create a CIImage from the pixelBuffer.
+        var ciImage: CIImage = CIImage(cvImageBuffer: pixelBuffer)
+        ciImage = ciImage.oriented(.leftMirrored)
+        
+        // Detect faces on the image.
+        self.detectFaces(on: ciImage)
     }
+    
 }
