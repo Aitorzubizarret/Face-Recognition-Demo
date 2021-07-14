@@ -54,6 +54,10 @@ class FaceDetectionViewController: UIViewController {
         AVCaptureDevice.requestAccess(for: .video) { (granted) in
             if granted {
                 print("Permission granted.")
+                
+                DispatchQueue.main.async {
+                    self.setupCameraSession()
+                }
             } else {
                 print("The user has NOT granted access to the camera.")
             }
