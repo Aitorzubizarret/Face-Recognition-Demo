@@ -17,8 +17,15 @@ class FaceDetectionViewController: UIViewController {
     // MARK: - Properties
     
     private var captureSession: AVCaptureSession = AVCaptureSession()
-    private var previewLayer = AVCaptureVideoPreviewLayer()
     private var captureDevice: AVCaptureDevice?
+    
+    private var previewLayer = AVCaptureVideoPreviewLayer()
+    private var shapeLayer = CAShapeLayer()
+    private var drawings: [CAShapeLayer] = []
+    
+    private let faceDetectionRequest = VNDetectFaceRectanglesRequest()
+    private let faceLandmarksRequest = VNDetectFaceLandmarksRequest()
+    private let requestHandler = VNSequenceRequestHandler()
     
     // MARK: - Methods
     
@@ -32,6 +39,7 @@ class FaceDetectionViewController: UIViewController {
         super.viewDidLayoutSubviews()
 
         self.previewLayer.frame = self.view.frame
+        self.shapeLayer.frame = self.view.frame
     }
     
     ///
@@ -107,12 +115,15 @@ class FaceDetectionViewController: UIViewController {
         // Start the session.
         self.captureSession.startRunning()
         
-        // Add the PreviewLayer to the view.
+        // Add the PreviewLayer (video data output) to the view.
         self.previewLayer.session = self.captureSession
         
         self.previewLayer.videoGravity = .resizeAspectFill
         self.view.layer.addSublayer(self.previewLayer)
         self.previewLayer.frame = self.view.frame
+        
+        // Add the Shape layer (detected face rectangles) to the view.
+        self.view.layer.addSublayer(self.shapeLayer)
         
         // Create the data output and add it to the session.
         let dataOutput = AVCaptureVideoDataOutput()
@@ -124,19 +135,64 @@ class FaceDetectionViewController: UIViewController {
     /// Detect faces on an image.
     ///
     private func detectFaces(on image: CIImage) {
-        let faceDetectionRequest = VNDetectFaceRectanglesRequest()
-        let requestHandler = VNSequenceRequestHandler()
+        
+        // Clear previous rectangles from detected faces.
+        for drawing in self.drawings {
+            drawing.removeFromSuperlayer()
+        }
         
         do {
-            try requestHandler.perform([faceDetectionRequest], on: image)
+            try self.requestHandler.perform([self.faceDetectionRequest], on: image)
             
-            if let results = faceDetectionRequest.results {
+            if let results = self.faceDetectionRequest.results as? [VNFaceObservation] {
                 print("Faces detected: \(results.count)")
+                
+                // Try to detect face landmarks on a face.
+                if !results.isEmpty {
+                    for faceObservation in results {
+                        self.drawFaceRectangle(at: faceObservation.boundingBox)
+                    }
+                }
             } else {
                 print("No faces detected")
             }
+            
         } catch let error {
             print("Failed to handler FaceDetectionRequest: \(error.localizedDescription)")
+        }
+    }
+    
+    ///
+    /// Convert the bounding box from the detected face to a new bounding box compatible with the screen.
+    /// The new bounding box will be used to draw the rectangle in place on the screen.
+    ///
+    private func convertBoundingBox(detected: CGRect) -> CGRect {
+        let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -self.view.frame.height)
+        let translate = CGAffineTransform.identity.scaledBy(x: self.view.frame.width, y: self.view.frame.height)
+        let newBoundingBox = detected.applying(translate).applying(transform)
+        return newBoundingBox
+    }
+    
+    ///
+    /// Draw a rectangle on top of the detected face position.
+    ///
+    private func drawFaceRectangle(at position: CGRect) {
+        DispatchQueue.main.async {
+            // Convert the boundingBox.
+            let newBoundingBox = self.convertBoundingBox(detected: position)
+            
+            // Create the Shape layer.
+            let faceBoundingBoxShape = CAShapeLayer()
+            faceBoundingBoxShape.path = CGPath(rect: newBoundingBox, transform: nil)
+            faceBoundingBoxShape.fillColor = UIColor.clear.cgColor
+            faceBoundingBoxShape.strokeColor = UIColor.green.cgColor
+            faceBoundingBoxShape.lineWidth = 2.0
+            
+            // Add and display the new shape layer.
+            self.shapeLayer.addSublayer(faceBoundingBoxShape)
+            
+            // Save the shape layer to be removed later.
+            self.drawings.append(faceBoundingBoxShape)
         }
     }
     
