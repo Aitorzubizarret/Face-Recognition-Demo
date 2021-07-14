@@ -16,7 +16,7 @@ class FaceDetectionViewController: UIViewController {
     
     // MARK: - Properties
     
-    var captureSession: AVCaptureSession?
+    var captureSession: AVCaptureSession = AVCaptureSession()
     var captureDevice: AVCaptureDevice?
     
     // MARK: - Methods
@@ -91,25 +91,24 @@ class FaceDetectionViewController: UIViewController {
     ///
     private func displayCameraOutput() {
         guard let videoCaptureDevice = self.captureDevice,
-              let _ = self.captureSession,
               let videoDeviceInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
-              self.captureSession!.canAddInput(videoDeviceInput) else { return }
+              self.captureSession.canAddInput(videoDeviceInput) else { return }
         
         // Add the device input  to the session.
-        self.captureSession!.addInput(videoDeviceInput)
+        self.captureSession.addInput(videoDeviceInput)
         
         // Start the session.
-        self.captureSession!.startRunning()
+        self.captureSession.startRunning()
         
         // Create the preview layer.
-        let previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession!)
+        let previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
         self.view.layer.addSublayer(previewLayer)
         previewLayer.frame = UIScreen.main.bounds // FIXME: - Get the correct size for the preview layer.
         
         // Create the data output and add it to the session.
         let dataOutput = AVCaptureVideoDataOutput()
         dataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue")) // To run the method to detect Faces.
-        self.captureSession!.addOutput(dataOutput)
+        self.captureSession.addOutput(dataOutput)
     }
     
 }
