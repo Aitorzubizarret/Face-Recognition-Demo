@@ -16,8 +16,9 @@ class FaceDetectionViewController: UIViewController {
     
     // MARK: - Properties
     
-    var captureSession: AVCaptureSession = AVCaptureSession()
-    var captureDevice: AVCaptureDevice?
+    private var captureSession: AVCaptureSession = AVCaptureSession()
+    private var previewLayer = AVCaptureVideoPreviewLayer()
+    private var captureDevice: AVCaptureDevice?
     
     // MARK: - Methods
     
@@ -25,6 +26,12 @@ class FaceDetectionViewController: UIViewController {
         super.viewDidLoad()
         
         self.checkCameraPermission()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        self.previewLayer.frame = self.view.frame
     }
     
     ///
@@ -100,10 +107,12 @@ class FaceDetectionViewController: UIViewController {
         // Start the session.
         self.captureSession.startRunning()
         
-        // Create the preview layer.
-        let previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
-        self.view.layer.addSublayer(previewLayer)
-        previewLayer.frame = UIScreen.main.bounds // FIXME: - Get the correct size for the preview layer.
+        // Add the PreviewLayer to the view.
+        self.previewLayer.session = self.captureSession
+        
+        self.previewLayer.videoGravity = .resizeAspectFill
+        self.view.layer.addSublayer(self.previewLayer)
+        self.previewLayer.frame = self.view.frame
         
         // Create the data output and add it to the session.
         let dataOutput = AVCaptureVideoDataOutput()
