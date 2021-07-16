@@ -21,7 +21,6 @@ class FaceDetectionViewController: UIViewController {
     
     private var previewLayer = AVCaptureVideoPreviewLayer()
     private var shapeLayer = CAShapeLayer()
-    private var drawings: [CAShapeLayer] = []
     
     private let faceDetectionRequest = VNDetectFaceRectanglesRequest()
     private let faceLandmarksRequest = VNDetectFaceLandmarksRequest()
@@ -137,8 +136,8 @@ class FaceDetectionViewController: UIViewController {
     private func detectFaces(on image: CIImage) {
         
         // Clear previous rectangles from detected faces.
-        for drawing in self.drawings {
-            drawing.removeFromSuperlayer()
+        DispatchQueue.main.async {
+            self.shapeLayer.sublayers?.removeAll()
         }
         
         do {
@@ -147,8 +146,8 @@ class FaceDetectionViewController: UIViewController {
             if let results = self.faceDetectionRequest.results as? [VNFaceObservation] {
                 print("Faces detected: \(results.count)")
                 
-                // Try to detect face landmarks on a face.
                 if !results.isEmpty {
+                    // Draw a rectangle over each detected face.
                     for faceObservation in results {
                         self.drawFaceRectangle(at: faceObservation.boundingBox)
                     }
