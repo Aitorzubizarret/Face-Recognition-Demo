@@ -20,9 +20,16 @@ class FaceDetectionViewController: UIViewController {
     private var captureDevice: AVCaptureDevice?
     
     private var previewLayer = AVCaptureVideoPreviewLayer()
-    private var faceRectangleLayer = CAShapeLayer()
-    private var faceLandmarksLayer = CAShapeLayer()
-    //private var shapeLayer = CAShapeLayer()
+    private var faceRectangleLayer: CAShapeLayer = {
+        var layer = CAShapeLayer()
+        layer.setAffineTransform(CGAffineTransform(scaleX: 1, y: -1)) // Left mirrored.
+        return layer
+    }()
+    private var faceLandmarksLayer: CAShapeLayer = {
+        var layer = CAShapeLayer()
+        layer.setAffineTransform(CGAffineTransform(scaleX: 1, y: -1)) // Left mirrored.
+        return layer
+    }()
     
     private let faceDetectionRequest = VNDetectFaceRectanglesRequest()
     private let faceLandmarksRequest = VNDetectFaceLandmarksRequest()
@@ -42,7 +49,6 @@ class FaceDetectionViewController: UIViewController {
         self.previewLayer.frame = self.view.frame
         self.faceRectangleLayer.frame = self.view.frame
         self.faceLandmarksLayer.frame = self.view.frame
-        self.faceLandmarksLayer.setAffineTransform(CGAffineTransform(scaleX: 1, y: -1))
     }
     
     ///
@@ -141,7 +147,6 @@ class FaceDetectionViewController: UIViewController {
     /// Detect faces on an image.
     ///
     private func detectFaces(on image: CIImage) {
-        
         // Clear previous face rectangle and face landmarks layer from detected faces.
         DispatchQueue.main.async {
             self.faceRectangleLayer.sublayers?.removeAll()
@@ -194,15 +199,30 @@ class FaceDetectionViewController: UIViewController {
             if let results = self.faceLandmarksRequest.results as? [VNFaceObservation],
                let boundingBox = self.faceLandmarksRequest.inputFaceObservations?.first?.boundingBox {
                 for faceObservation in results {
+                    // All points.
+                    //self.drawFaceLandmark(at: faceObservation.landmarks?.allPoints, boundingBox: boundingBox)
+                    
+                    // Median line.
+                    //self.drawFaceLandmark(at: faceObservation.landmarks?.medianLine, boundingBox: boundingBox)
+                    
+                    // Face contour.
                     self.drawFaceLandmark(at: faceObservation.landmarks?.faceContour, boundingBox: boundingBox)
+                    
+                    // Left eyebrow + eye + pupil.
                     self.drawFaceLandmark(at: faceObservation.landmarks?.leftEyebrow, boundingBox: boundingBox)
                     self.drawFaceLandmark(at: faceObservation.landmarks?.leftEye, boundingBox: boundingBox)
                     self.drawFaceLandmark(at: faceObservation.landmarks?.leftPupil, boundingBox: boundingBox)
+                    
+                    // Right eyebrow + eye + pupil.
                     self.drawFaceLandmark(at: faceObservation.landmarks?.rightEyebrow, boundingBox: boundingBox)
                     self.drawFaceLandmark(at: faceObservation.landmarks?.rightEye, boundingBox: boundingBox)
                     self.drawFaceLandmark(at: faceObservation.landmarks?.rightPupil, boundingBox: boundingBox)
+                    
+                    // Nose + nose crest.
                     self.drawFaceLandmark(at: faceObservation.landmarks?.nose, boundingBox: boundingBox)
                     self.drawFaceLandmark(at: faceObservation.landmarks?.noseCrest, boundingBox: boundingBox)
+                    
+                    // Lips.
                     self.drawFaceLandmark(at: faceObservation.landmarks?.innerLips, boundingBox: boundingBox)
                     self.drawFaceLandmark(at: faceObservation.landmarks?.outerLips, boundingBox: boundingBox)
                 }
@@ -212,17 +232,6 @@ class FaceDetectionViewController: UIViewController {
         } catch let error {
             print("Failed to handler FaceLandmarksRequest: \(error.localizedDescription)")
         }
-    }
-    
-    ///
-    /// Convert the bounding box from the detected face to a new bounding box compatible with the screen.
-    /// The new bounding box will be used to draw the rectangle in place on the screen.
-    ///
-    private func convertBoundingBox(detected: CGRect) -> CGRect {
-        let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -self.view.frame.height)
-        let translate = CGAffineTransform.identity.scaledBy(x: self.view.frame.width, y: self.view.frame.height)
-        let newBoundingBox = detected.applying(translate).applying(transform)
-        return newBoundingBox
     }
     
     ///
@@ -253,7 +262,7 @@ class FaceDetectionViewController: UIViewController {
     private func drawFaceRectangle(at position: CGRect) {
         DispatchQueue.main.async {
             // Convert the boundingBox.
-            let newBoundingBox = self.convertBoundingBox(detected: position)
+            let newBoundingBox: CGRect = VNImageRectForNormalizedRect(position, Int(self.view.frame.width), Int(self.view.frame.height))
             
             // Create the Shape layer.
             let faceBoundingBoxShape = CAShapeLayer()
