@@ -12,10 +12,14 @@ class MainViewController: UIViewController {
 
     // MARK: - UI Elements
     
-    @IBOutlet weak var faceDetectionButton: UIButton!
-    @IBAction func faceDetectionButtonTapped(_ sender: Any) {
+    @IBOutlet weak var faceDetectionFromCameraButton: UIButton!
+    @IBAction func faceDetectionFromCameraButtonTapped(_ sender: Any) {
         self.goToFaceDetectionVC()
     }
+    @IBOutlet weak var faceDetectionFromImageButton: UIButton!
+    @IBAction func faceDetectionFromImageButtonTapped(_ sender: Any) {
+    }
+    
     
     // MARK: - Properties
     

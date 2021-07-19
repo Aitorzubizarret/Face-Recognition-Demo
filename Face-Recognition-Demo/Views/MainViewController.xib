@@ -11,7 +11,8 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MainViewController" customModule="Face_Recognition_Demo" customModuleProvider="target">
             <connections>
-                <outlet property="faceDetectionButton" destination="gfn-Ba-6Gy" id="Q5f-0v-7gY"/>
+                <outlet property="faceDetectionFromCameraButton" destination="gfn-Ba-6Gy" id="iDP-vJ-0vT"/>
+                <outlet property="faceDetectionFromImageButton" destination="nfc-kS-rad" id="Ers-T3-B3B"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -24,13 +25,23 @@
                     <rect key="frame" x="40" y="84" width="334" height="738"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gfn-Ba-6Gy">
-                            <rect key="frame" x="0.0" y="0.0" width="334" height="738"/>
-                            <state key="normal" title="Face Detection"/>
+                            <rect key="frame" x="0.0" y="0.0" width="334" height="369"/>
+                            <state key="normal" title="Face Detection from Camera"/>
                             <connections>
-                                <action selector="faceDetectionButtonTapped:" destination="-1" eventType="touchUpInside" id="TU2-1T-6KV"/>
+                                <action selector="faceDetectionFromCameraButtonTapped:" destination="-1" eventType="touchUpInside" id="u9P-Qe-zag"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nfc-kS-rad">
+                            <rect key="frame" x="0.0" y="369" width="334" height="369"/>
+                            <state key="normal" title="Face Detection from Image"/>
+                            <connections>
+                                <action selector="faceDetectionFromImageButtonTapped:" destination="-1" eventType="touchUpInside" id="YKJ-T1-pg3"/>
                             </connections>
                         </button>
                     </subviews>
+                    <constraints>
+                        <constraint firstItem="nfc-kS-rad" firstAttribute="height" secondItem="gfn-Ba-6Gy" secondAttribute="height" id="NqH-qZ-XXD"/>
+                    </constraints>
                 </stackView>
             </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
